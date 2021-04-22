@@ -5,6 +5,7 @@
  **************************************************************************** */
 
 import edu.princeton.cs.algs4.StdRandom;
+
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 
@@ -14,7 +15,7 @@ public class RandomizedQueue<Item> implements Iterable<Item> {
 
     // construct an empty randomized queue
     public RandomizedQueue() {
-        items = (Item[]) new Object[1];
+        items = (Item[]) new Object[2];
         index = 0;
     }
 
@@ -76,8 +77,9 @@ public class RandomizedQueue<Item> implements Iterable<Item> {
         private int remaining;
 
         public RandomizedQueueIterator() {
-            for (int i = 0; i < remaining; i++ ) {
-                indices[i] = 1;
+            indices = new int[index];
+            for (int i = 0; i < index; i++) {
+                indices[i] = i;
             }
             remaining = index;
         }
@@ -93,12 +95,13 @@ public class RandomizedQueue<Item> implements Iterable<Item> {
             if (!hasNext()) {
                 throw new NoSuchElementException("No such element!");
             }
-            int randNum = StdRandom.uniform(remaining);
-            while(indices[randNum] < 0) {
-                randNum = StdRandom.uniform(remaining);
+            int randNum = StdRandom.uniform(index);
+            while (indices[randNum] < 0) {
+                randNum = StdRandom.uniform(index);
             }
             Item item = items[randNum];
-            indices[randNum] = -1;
+            indices[randNum] = remaining - 1;
+            indices[remaining - 1] = -1;
             remaining -= 1;
             return item;
         }
@@ -124,8 +127,8 @@ public class RandomizedQueue<Item> implements Iterable<Item> {
         randomizedQueue.enqueue("item2");
         System.out.println(randomizedQueue.size());
         System.out.println("------------------------------");
-        Iterator iterator =randomizedQueue.iterator();
-        while( iterator.hasNext()) {
+        Iterator<String> iterator = randomizedQueue.iterator();
+        while (iterator.hasNext()) {
             System.out.println(randomizedQueue.dequeue());
             System.out.println(randomizedQueue.size());
             if (randomizedQueue.size() == 0) {
