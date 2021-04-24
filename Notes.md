@@ -86,32 +86,32 @@
        * Connected command: if two points have the same id, then they are connected
        * Union command: when union point `p` to point `q`, change all elements whose id equals to `id[p]` to `id[q]`
      * Algorithm
-      ```java
-      public class QuickFindUF {
-        private int[] id;
+        ```java
+        public class QuickFindUF {
+          private int[] id;
 
-        public QuickFindUF(int N) {
-          id = new int[N];
-          for (int i = 0; i < N; i++) {
-            id[i] = i;
+          public QuickFindUF(int N) {
+            id = new int[N];
+            for (int i = 0; i < N; i++) {
+              id[i] = i;
+            }
           }
-        }
 
-        public boolean connected(int p, int q) {
-          return id[p] == id[q];
-        }
+          public boolean connected(int p, int q) {
+            return id[p] == id[q];
+          }
 
-        public void union(int p, int q) {
-          int idp = id[p];
-          int idq = id[q];
-          for (int i = 0; i < N; i++) {
-            if (id[i] == idp) {
-              id[i] = idq;
+          public void union(int p, int q) {
+            int idp = id[p];
+            int idq = id[q];
+            for (int i = 0; i < N; i++) {
+              if (id[i] == idp) {
+                id[i] = idq;
+              }
             }
           }
         }
-      }
-      ```
+        ```
       * Performance analysis: N union objects on N objects takes quadratic time, which is quite unbearable fo large datasets
     * Quick Union
       * It's a lazy approach  to solve the dynamic connectivity problem
@@ -121,34 +121,34 @@
         * Connected command: if two points have the same root, then they are connected
         * Union command: when union point `p` to point `q`, set the parent of p's root be q's root
       * Algorithm
-       ```java
-       public class QuickUnionUF {
-         private int[] id;
+        ```java
+        public class QuickUnionUF {
+          private int[] id;
 
-         public QuickUnionUF(int N) {
-           for (int i = 0; i < N; i++) {
-             id[i] = i;
-           }
-         }
+          public QuickUnionUF(int N) {
+            for (int i = 0; i < N; i++) {
+              id[i] = i;
+            }
+          }
 
-         private int root(int node) {
-           while(node != id[node]) {
-             node = id[node];
-           }
-           return node;
-         }
-        
-         public boolean connected(int p, int q) {
-           return root(p) == root(q);
-         }
+          private int root(int node) {
+            while(node != id[node]) {
+              node = id[node];
+            }
+            return node;
+          }
+          
+          public boolean connected(int p, int q) {
+            return root(p) == root(q);
+          }
 
-         public void union(int p, int q) {
-           int rootp = root(p);
-           int rootq = root(q);
-           id[rootp] = rootq;
-         }
-       }
-       ```
+          public void union(int p, int q) {
+            int rootp = root(p);
+            int rootq = root(q);
+            id[rootp] = rootq;
+          }
+        }
+        ```
        * Performance analysis: trees can be too tall, then find command can be slow since it's a linear operation
      * Quick Union Improvement
        * Improvement 1: Weighting
@@ -156,19 +156,19 @@
          * Data structure description: same as quick union, but maintain extra array `size[i]` to count number of objects in the tree rooted at `i`
          * Find command: identical to quick union
          * Union link root of smaller tree to root of larger tree, update the size[] array
-         ```java
-        public void union(int p, int q) {
-          int rootp = root(p);
-          int rootq = root(q);
-          if (size(rootp) <= size(rootq)) {
-            id[rootp] = rootq;
-            size[rootq] += size[rootp];
-          } else {
-            id[rootq] = rootp;
-            size[rootp] += size[rootq];
-          }
-        }
-         ```
+            ```java
+            public void union(int p, int q) {
+              int rootp = root(p);
+              int rootq = root(q);
+              if (size(rootp) <= size(rootq)) {
+                id[rootp] = rootq;
+                size[rootq] += size[rootp];
+              } else {
+                id[rootq] = rootp;
+                size[rootp] += size[rootq];
+              }
+            }
+            ```
          * Theorem: depth of any node x is at most lgN
          * Performance analysis
           ![](/images/Algorithm/UFPerformance.png)
@@ -180,15 +180,15 @@
          * Java implementation 
            * Two-pass implementation: add a second loop to `root()` to set the `id[]` of each examined node to the root
            * Simpler one-pass variant: make every other node in path point to its grandparent
-            ```java
-            private int root(int node) {
-              while (node != id[node]) {
-                id[node] = id[id[node]];
-                node = id[node];
+              ```java
+              private int root(int node) {
+                while (node != id[node]) {
+                  id[node] = id[id[node]];
+                  node = id[node];
+                }
+                return node;
               }
-              return node;
-            }
-            ```
+              ```
           * Theorem: starting from an empty data structure, any sequence of M union-find operations on N objects makes $\leq c(N + M lgN)$ array accesses. Actually there is no linear algorithm for the union find problem
         * Summary
           ![](/images/Algorithm/UFSummary.png)
@@ -304,15 +304,15 @@
         ```java
         public class ArrayStack {
           private String[] items = new String[1];
-          private N = 0;
-          
+     private N = 0;
+     
           public void push(String item) {
             if (N == items.length) {
               resize(2 * items.length);
             }
             items[N++] = item;
-          }
-          
+     }
+     
           public String pop() {
             String item = items[--N];
             items[N] = null;
@@ -320,8 +320,8 @@
               resize(items.length / 2)
             }
             return item;
-          }
-          
+     }
+     
           private void resize(int capacity) {
             String[] copy = new String[capacity];
             for (int i = 0; i < N; i++) {
@@ -352,13 +352,13 @@
         ```java
         public class LinkedListQueue {
           private Node first;
-          private Node last;
-
+       private Node last;
+   
           private class Node {
-            Item item;
+            String item;
             Node next;
-          }
-
+       }
+   
           public String dequeue() {
             String item = first.item;
             first = first.next;
@@ -366,8 +366,8 @@
               last = null;
             }
             return item;
-          }
-
+       }
+   
           public void enqueue(String item) {
             Node oldLast = last;
             last = new Node();
@@ -389,16 +389,16 @@
         public class ArrayQueue {
           private String[] items = new String[1];
           private int front = 0;
-          private int rear = 0;
-
+       private int rear = 0;
+   
           public void enqueue(String item) {
             if (rear - front == items.length) {
               resize(2 * items.length);
             }
             items[rear] = item;
             rear += 1;
-          }
-
+       }
+   
           public String dequeue() {
             String item = items[front];
             items[front] = null;
@@ -406,8 +406,8 @@
             if ( rear - front > 0 && rear - front == items.length / 4) {
               resize(items.length / 2);
             }
-          }
-
+       }
+   
           public void resize(int capacity) {
             String[] copy = new String[capacity];
             for (int i = 0; i < rear - front; i++) {
@@ -425,26 +425,26 @@
       * LinkedList Stack with Generics
         ```java
         public class LinkedListStackGeneric<T> {
-          private Node first = null;
-    
+       private Node first = null;
+   
           private class Node {
             T item;
             Node next;
-          }
-    
+       }
+   
           public void push(T item) {
             Node oldFirst = first;
             first = new Node();
             first.item = item;
             first.next = oldFirst;
-          }
-    
+       }
+   
           public T pop() {
             T item = first.item;
             first = first.next;
             return item;
-          }
-    
+       }
+   
           public boolean isEmpty() {
             return first == null;
           }
@@ -454,21 +454,21 @@
         ```java
         public class ArrayStackGeneric<T> {
           private T[] items;
-          private int N = 0;
-
+       private int N = 0;
+   
           public ArrayStackGeneric(int capacity) {
             // It's not allowed in java to create generic arrays, you need type casting here
             s = (T[]) new Object[capacity];
-          }
-
+       }
+   
           public boolean isEmpty() {
             return N ==0;
-          }
-
+       }
+   
           public void push(T item) {
             items[N++] = item;
-          }
-
+       }
+   
           public T pop() {
             T item = items[--N];
             items[N] = null;
@@ -503,43 +503,43 @@
         ```
      * LinkedList Stack with Iterator
         ```java
-
-        public class LinkedListStack<T> implements Iterable<T> {
-          ...
-          public Iterator<T> iterator() {
-            return new ListIterator();
+      
+            public class LinkedListStack<T> implements Iterable<T> {
+              ...
+              public Iterator<T> iterator() {
+                return new ListIterator();
           }
-
-          private class ListIterator implements java.util.Iterator<T> {
-            private Node current = first;
-            
-            public boolean hasNext() {
-              return current != null;
+      
+              private class ListIterator implements java.util.Iterator<T> {
+                private Node current = first;
+                
+                public boolean hasNext() {
+                  return current != null;
             }
-
-            public T next() {
-              T item = current.item;
-              current = current.next;
-              return item;
+      
+                public T next() {
+                  T item = current.item;
+                  current = current.next;
+                  return item;
+                }
+              }
             }
-          }
-        }
-        ```
+            ```
       * Array List Stack with Iterator
         ```java
         public class ArrayStack<T> implements Iterable<T> {
           
           public Iterator<T> iterator() {
             return new ArrayIterator();
-          }
-
+       }
+   
           private class ArrayIterator implements Iterator<T> {
-            private int i = N;
-
+         private int i = N;
+   
             public boolean hasNext() {
               return i > 0;
-            }
-
+         }
+   
             public T next() {
               return items[--i];
             }
@@ -554,8 +554,8 @@
             Bag();
             void add(T item);
             int size();
-            Iterable<T> iterator();
-
+         Iterable<T> iterator();
+   
           }
           ```
    * Stack and Queue Applications
@@ -584,8 +584,8 @@
         // Deque interface and its implementations, which should be used in preference to this class. 
         //Space complexity: O(N), time complexity: O(N)
         class MyQueue {
-          Deque<Integer> out, in;
-
+       Deque<Integer> out, in;
+   
           public MyQueue() {
               in = new ArrayDeque<>();
               out = new ArrayDeque<>();
@@ -652,3 +652,144 @@
         } 
         ```
       * Max/Min Stack: use another stack to trace the max/min value
+
+
+
+2. Elementary Sorts
+   * Sorting Introduction
+     * Callbacks
+       * Goal: sort any type of data
+       * Client passes array of objects to `sort()` function, the sort function calls back object's `compareTo()` method as needed
+     * Implementing callbacks
+       * Java: interface
+          ```java
+          public interface Comparable<Item> {
+            public int compareTo(Item that);
+          }
+          // v.compareTo(w) returns negative integer, zero, or positive if v < w, v == w, or v > w
+          // if v and w are not comparable, throws an Exception
+          ```
+       * C: function pointers
+       * C++: class-type pointers
+       * Python, Perl, Javascript: first-class functions
+     * Total order:
+       * Antisymmetry: if $v \leq w$ and $w \leq v$, then $v = w$
+       * Transitivity: if $v \leq w$ and $w \leq x$, then $v \leq x$
+       * Totality: either $v \leq w$ or $w \leq v$ or both
+   * Selection Sort
+     * Idea to get an ascending array
+       * In iteration i, find index `min` of smallest remaining entry
+       * Swap `array[i]` and `array[min]`
+       * The part on the left side of i is an invariant, that is, the entries are sorted
+     * Implementation
+        ```java
+        public class SelectionSort {
+          public static void sort(Comparable[] items) {
+            int N = items.length;
+            for (int i = 0; i < N; i++) {
+              int min = i;
+              for (int j = i + 1; j < N; j++) {
+                if (items[j].compareTo(items[min]) < 0) {
+                  min = j;
+                }
+              }
+              Comparable item = items[min];
+              items[min] = items[i];
+              items[i] = item;
+            }
+          }
+        }
+        ```
+     * For an array with size $N$, selection sort takes about $\frac{N^2}{2}$ comparisons and about $N$ exchanges. No matter whether the input is sorted or totally unsorted, the complexity of selection sort is always quadratic
+   * Insertion Sort
+     * Idea to get an ascending array
+       * In iteration i, swap `array[i]` with each larger entry to its left
+       * The part on the left side of i is an invariant, that is, the entries are sorted 
+     * Implementation
+        ```java
+        public class InsertionSort {
+          public static void sort(Comparable[] items) {
+            int N = items.length;
+            for (int i = 0; i < N; i++) {
+              for (int j = i; j > 0; j--) {
+                if (items[j].compareTo(items[i]) > 0) {
+                  Comparable item = items[j];
+                  items[j] = items[i];
+                  items[i] = item;
+                }
+              }
+            }
+          }
+        }
+        ```
+     * For a randomly-ordered array with $N$ distinct keys, insertion sort uses about $\frac{N^2}{4}$ comparisons and about $\frac{N^2}{4}$ exchanges on average. 
+     * For an ordered array, insertion sort makes $N - 1$ comparisons and $0$ exchanges
+     * For an reversely-ordered array, insertion sort makes about $\frac{N^2}{2}$ comparisons and about $\frac{N^2}{4}$ exchanges
+   * Shell Sort
+     * Idea to get an ascending array
+       * Move entries more than one position at a time by h-sorting the array
+       * Use insertion sort in h-sorting: for large h, the subarray is small, so sorting can be fast, for small h, the array is nearly sorted, to insertion sort is fast
+       * A m-sorted array is still m-sorted after being n-sorted
+       * The general chosen h is $h = 3 * h + 1$
+     * Implementation
+        ```java
+        public class ShellSort {
+          public static void sort(Comparable[] items) {
+            int N = items.length;
+            int h = 1;
+            while (h < N /3) {
+              h = 3 * h + 1;
+            }
+            while (h >= 1) {
+              for (int i = h; i < N; i++) {
+                for (int j = i; j >= h && items[j].compareTo(items[j - h]) < 0; j -= h) {
+                  Comparable item = items[j];
+                  items[j] = items[j - h];
+                  items[j - h] = item;
+                }
+                h = h / 3;
+              }
+            }
+          }
+        }
+        ```
+     * The worst-case number of comparisons used by shell sort with $3 * h + 1$ increments is $O(N^{\frac{3}{2}})$
+     * Shell sort is faster than selection sort and insertion sort, the larger the array is, the better the performance is
+   * Shuffling Sort
+     * Initial idea to get a randomized shuffle of an array
+       * Generate a random real number for each array entry
+       * Sort the array
+     * Shuffle sort produces a uniformly random permutation of the input array, provided no duplicate values
+     * Knuth shuffle in linear time
+       * In iteration i, pick integer r between 0 and i uniformly at random
+       * Swap `array[r]` and `array[i]`
+       * The part on the left side of i is an invariant, that is, the entries are uniformly randomized
+       * Implementation
+          ```java
+          public class ShuffleSort {
+            public static void sort(Comparable[] items) {
+              int N = items.length;
+              for (int i = 0; i < N; i++) {
+                int r = StdRandom.uniform(i + 1); // Uniform random number in [0, i]
+                Comparable item = items[r];
+                items[r] = items[i];
+                items[i] = item;
+              }
+            }
+          }
+          ```
+   * Convex Hull
+     * Some equivalent definitions of a convex hull
+       * The smallest perimeter fence enclosing a set of points
+       * The smallest convex set containing all the points
+       * The smallest area convex polygon enclosing the points
+       * The convex polygon enclosing the points, whose vertices are points in set 
+     * Output: sequence of vertices in counterclockwise order
+     * Fact
+       * Can traverse the convex hull by making only counterclockwise turns
+       * The vertices of convex hull appear in increasing order of polar angle with respect to point p with lowest y-coordinate
+     * Graham Scan
+       * Choose point p with smallest y-coordinate
+       * Sort points by polar angle with p
+       * Consider points in order, discard unless it creates a counterclockwise turn
+
