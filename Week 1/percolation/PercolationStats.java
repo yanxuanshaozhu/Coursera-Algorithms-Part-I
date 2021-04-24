@@ -33,7 +33,6 @@ public class PercolationStats {
         }
         return 1.0 * threshold / (n * n);
     }
-
     /**
      * Constructor for the simulation process
      *
@@ -51,7 +50,6 @@ public class PercolationStats {
         }
 
     }
-
     // sample mean of percolation threshold
     public double mean() {
         return StdStats.mean(results);
