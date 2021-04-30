@@ -1,12 +1,12 @@
 /* *****************************************************************************
  *  Name: yanxuanshaozhu
- *  Date: 04/27/2021
+ *  Date: 04/30/2021
  *  Description:
  **************************************************************************** */
 
 import java.util.Arrays;
 
-public class BruteCollinearPoints {
+public class FastCollinearPoints {
     private LineSegment[] lineSegments;
     private int numberOfSegments;
     private Point[] points;
@@ -19,11 +19,11 @@ public class BruteCollinearPoints {
     }
 
 
-    // finds all line segments containing 4 points
-    public BruteCollinearPoints(Point[] points) {
-        this.points = points;
-        this.numberOfSegments = 0;
+    // finds all line segments containing 4 or more points
+    public FastCollinearPoints(Point[] points) {
         this.lineSegments = new LineSegment[1];
+        this.numberOfSegments = 0;
+        this.points = points;
 
         if (this.points == null) {
             throw new IllegalArgumentException(
@@ -41,30 +41,13 @@ public class BruteCollinearPoints {
                 throw new IllegalArgumentException("input array contains identical points");
             }
         }
+        for (int i = 0; i < this.points.length; i++) {
+            Arrays.sort(this.points, points[i].slopeOrder());
+            int segmentLength = 1;
 
-        Arrays.sort(this.points);
 
-        for (int i = 0; i < this.points.length - 3; i++) {
-            for (int j = i + 1; j < this.points.length - 2; j++) {
-                for (int k = j + 1; k < this.points.length - 2; k++) {
-                    for (int l = k + 1; l < this.points.length; l++) {
-                        if (this.points[i].slopeTo(this.points[j]) == this.points[i]
-                                .slopeTo(this.points[k])
-                                && this.points[i].slopeTo(this.points[k]) == this.points[i]
-                                .slopeTo(this.points[l])) {
-                            LineSegment lineSegment = new LineSegment(points[i], points[l]);
 
-                            if (this.numberOfSegments == this.lineSegments.length) {
-                                resize(this.lineSegments.length * 2);
-                            }
-                            this.lineSegments[this.numberOfSegments++] = lineSegment;
-                        }
-                    }
-                }
-            }
         }
-
-
     }
 
     // the number of line segments
@@ -72,10 +55,9 @@ public class BruteCollinearPoints {
         return this.numberOfSegments;
     }
 
+
     // the line segments
     public LineSegment[] segments() {
-        return lineSegments;
+        return this.lineSegments;
     }
-
-
 }
