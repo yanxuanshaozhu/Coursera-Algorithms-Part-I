@@ -1,7 +1,7 @@
 /* *****************************************************************************
  *  Name: yanxuanshaozhu
  *  Date: 04/30/2021
- *  Description:
+ *  Description: coursera algorithm week 3 project
  **************************************************************************** */
 
 import edu.princeton.cs.algs4.In;
@@ -31,7 +31,8 @@ public class Client {
         StdDraw.show();
 
         // print and draw the line segments
-        FastCollinearPoints collinear = new FastCollinearPoints(points);
+        // FastCollinearPoints collinear = new FastCollinearPoints(points);
+        BruteCollinearPoints collinear = new BruteCollinearPoints(points);
         for (LineSegment segment : collinear.segments()) {
             StdOut.println(segment);
             segment.draw();

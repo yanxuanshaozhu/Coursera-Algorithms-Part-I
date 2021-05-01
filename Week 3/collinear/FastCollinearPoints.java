@@ -1,63 +1,83 @@
 /* *****************************************************************************
  *  Name: yanxuanshaozhu
  *  Date: 04/30/2021
- *  Description:
+ *  Description: coursera algorithm week 3 project
  **************************************************************************** */
 
+
 import java.util.Arrays;
+import java.util.LinkedList;
 
 public class FastCollinearPoints {
-    private LineSegment[] lineSegments;
-    private int numberOfSegments;
-    private Point[] points;
+    private int numberOfSegments = 0;
+    private LinkedList<LineSegment> lineSegments = new LinkedList<LineSegment>();
 
-
-    private void resize(int capacity) {
-        LineSegment[] copy = new LineSegment[capacity];
-        System.arraycopy(this.lineSegments, 0, copy, 0, this.lineSegments.length);
-        this.lineSegments = copy;
-    }
-
-
-    // finds all line segments containing 4 or more points
     public FastCollinearPoints(Point[] points) {
-        this.lineSegments = new LineSegment[1];
-        this.numberOfSegments = 0;
-        this.points = points;
+        int N = points.length;
 
-        if (this.points == null) {
+        if (points == null) {
             throw new IllegalArgumentException(
                     "argument to BruteCollinearPoints constructor is null");
         }
 
-        for (Point point : this.points) {
-            if (point == null) {
+        for (int i = 0; i < points.length; i++) {
+            if (points[i] == null) {
                 throw new IllegalArgumentException("input array contains null points");
             }
         }
 
-        for (int i = 1; i < this.points.length; i++) {
-            if (points[i - 1].compareTo(points[i]) == 0) {
-                throw new IllegalArgumentException("input array contains identical points");
+        for (int i = 0; i < N; i++) {
+            for (int j = 0; j < N; j++) {
+                if (i != j && points[i].compareTo(points[j]) == 0) {
+                    throw new IllegalArgumentException("input array contains identical points");
+                }
             }
         }
-        for (int i = 0; i < this.points.length; i++) {
-            Arrays.sort(this.points, points[i].slopeOrder());
-            int segmentLength = 1;
 
-
-
+        for (int i = 0; i < N; i++) {
+            Point[] temp = new Point[N - i];
+            for (int k = 0; k < N - i; k++) {
+                temp[k] = points[k + i];
+            }
+            Arrays.sort(temp, points[i].slopeOrder());
+            int j = 0;
+            while (j < N - i - 2) {
+                if (points[i].slopeTo(temp[j]) == points[i].slopeTo(temp[j + 1])
+                        && points[i].slopeTo(temp[j]) == points[i].slopeTo(temp[j + 2])) {
+                    LinkedList<Point> linkedsegments = new LinkedList<Point>();
+                    linkedsegments.add(points[i]);
+                    int k = j + 2;
+                    int g = 3;
+                    while (k < (points.length - i - 1) && points[i].slopeTo(temp[k]) == points[i]
+                            .slopeTo(temp[k + 1])) {
+                        k++;
+                        g++;
+                    }
+                    while (k >= j) {
+                        linkedsegments.add(temp[k]);
+                        k--;
+                    }
+                    Point[] arraysegments = linkedsegments.toArray(new Point[g + 1]);
+                    Arrays.sort(arraysegments);
+                    LineSegment segment = new LineSegment(arraysegments[0], arraysegments[g]);
+                    lineSegments.add(segment);
+                    numberOfSegments++;
+                    j = g + j;
+                } else
+                    j++;
+            }
         }
     }
 
-    // the number of line segments
+    // finds all line segments containing 4 or more points
     public int numberOfSegments() {
         return this.numberOfSegments;
     }
 
-
-    // the line segments
+    // the number of line segments
     public LineSegment[] segments() {
-        return this.lineSegments;
+        LineSegment[] segments = lineSegments.toArray(new LineSegment[this.numberOfSegments]);
+        return segments;
     }
+
 }
