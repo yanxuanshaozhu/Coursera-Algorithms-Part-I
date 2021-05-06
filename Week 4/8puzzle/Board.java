@@ -1,16 +1,16 @@
 /* *****************************************************************************
  *  Name:  yanxuanshaozhu
- *  Date:  05/24/2021
+ *  Date:  05/04/2021
  *  Description: coursera algorithm week 4 project
  **************************************************************************** */
 
-import edu.princeton.cs.algs4.StdRandom;
+import edu.princeton.cs.algs4.In;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 
 public class Board {
-    private int[][] board;
+    private final int[][] board;
     private final int size;
 
     // create a board from an n-by-n array of tiles,
@@ -89,7 +89,7 @@ public class Board {
         if (y == null) {
             return false;
         }
-        if (y.getClass() != Board.class) {
+        if (y.getClass() != this.getClass()) {
             return false;
         } else {
             if (this.size != ((Board) y).size) {
@@ -158,7 +158,7 @@ public class Board {
         if (this.board[this.size - 1][this.size - 1] == 0) {
             boards = new ArrayList<>(2);
             temp[this.size - 1][this.size - 1] = temp[this.size - 1][this.size - 2];
-            temp[this.size - 1][this.size - 1] = 0;
+            temp[this.size - 1][this.size - 2] = 0;
             Board board1 = new Board(temp);
             boards.add(board1);
             temp[this.size - 1][this.size - 2] = temp[this.size - 1][this.size - 1];
@@ -275,61 +275,86 @@ public class Board {
 
     // a board that is obtained by exchanging any pair of tiles
 
+    // At first I want to use randomization to do this, like the following one.
+    // But it cannot pass the immutable test.
+    // The following is mentioned by the instructor in the discussion forum: Randomization
+    // is a valid way to return a twin but it leads to a mutable type. A method in an immutable
+    // type must return the same value given the same argument. Board must be immutable.
+    // public Board twin() {
+    //     int x0 = StdRandom.uniform(this.size);
+    //     int y0 = StdRandom.uniform(this.size);
     //
+    //     while (this.board[x0][y0] == 0) {
+    //         x0 = StdRandom.uniform(this.size);
+    //         y0 = StdRandom.uniform(this.size);
+    //     }
+    //
+    //     int x1 = StdRandom.uniform(this.size);
+    //     int y1 = StdRandom.uniform(this.size);
+    //
+    //     while (this.board[x1][y1] == 0 || x1 == x0 && y1 == y0) {
+    //         x1 = StdRandom.uniform(this.size);
+    //         y1 = StdRandom.uniform(this.size);
+    //     }
+    //
+    //     int[][] temp = new int[this.board.length][];
+    //     for (int i = 0; i < this.board.length; i++) {
+    //         temp[i] = Arrays.copyOf(this.board[i], this.board[i].length);
+    //     }
+    //     int val = temp[x0][y0];
+    //     temp[x0][y0] = temp[x1][y1];
+    //     temp[x1][y1] = val;
+    //     return new Board(temp);
+    // }
+
     public Board twin() {
-        int x0 = StdRandom.uniform(this.size);
-        int y0 = StdRandom.uniform(this.size);
-
-        while (this.board[x0][y0] == 0) {
-            x0 = StdRandom.uniform(this.size);
-            y0 = StdRandom.uniform(this.size);
-        }
-
-        int x1 = StdRandom.uniform(this.size);
-        int y1 = StdRandom.uniform(this.size);
-
-        while (this.board[x1][y1] == 0 || x1 == x0 && y1 == y0) {
-            x1 = StdRandom.uniform(this.size);
-            y1 = StdRandom.uniform(this.size);
-        }
 
         int[][] temp = new int[this.board.length][];
         for (int i = 0; i < this.board.length; i++) {
             temp[i] = Arrays.copyOf(this.board[i], this.board[i].length);
         }
-        int val = temp[x0][y0];
-        temp[x0][y0] = temp[x1][y1];
-        temp[x1][y1] = val;
-        return new Board(temp);
+        for (int i = 0; i < this.size; i++) {
+            for (int j = 0; j < this.size; j++) {
+                if (j + 1 < this.size && temp[i][j] != 0 && temp[i][j + 1] != 0) {
+                    int item = temp[i][j];
+                    temp[i][j] = temp[i][j + 1];
+                    temp[i][j + 1] = item;
+                    return new Board(temp);
+                }
+            }
+        }
+        return null;
     }
 
-    //unit testing (not graded)
-    // public static void main(String[] args) {
-    //     int[][] nums = { { 1, 0 }, { 2, 3 } };
-    //     Board board = new Board(nums);
-    //     System.out.println("size: " + board.size);
-    //     System.out.println("print: \n " + board);
-    //     System.out.println("Hamming:" + board.hamming());
-    //     System.out.println("Manhattan: " + board.manhattan());
-    //     System.out.println("self: \n" + board);
-    //     Iterable<Board> neighbors = board.neighbors();
-    //     for (Board neighbor : neighbors) {
-    //         System.out.println("neighbor:\n" + neighbor);
-    //     }
-    //     System.out.println("self: \n" + board);
-    //     Board twin = board.twin();
-    //     System.out.println("twin: " + twin);
-    //
-    //     In in = new In(args[0]);
-    //     int n = in.readInt();
-    //     int[][] tiles = new int[n][n];
-    //     for (int i = 0; i < n; i++)
-    //         for (int j = 0; j < n; j++)
-    //             tiles[i][j] = in.readInt();
-    //     Board initial = new Board(tiles);
-    //     System.out.println(initial);
-    //     for (Board board : initial.neighbors()) {
-    //         System.out.println(board);
-    //     }
-    // }
+    // unit testing (not graded)
+    public static void main(String[] args) {
+        // int[][] nums = { { 1, 2 }, { 0, 3 } };
+        // Board board = new Board(nums);
+        // System.out.println("size: " + board.size);
+        // System.out.println("print: \n " + board);
+        // System.out.println("Hamming:" + board.hamming());
+        // System.out.println("Manhattan: " + board.manhattan());
+        // System.out.println("self: \n" + board);
+        // Iterable<Board> neighbors = board.neighbors();
+        // for (Board neighbor : neighbors) {
+        //     System.out.println("neighbor:\n" + neighbor);
+        // }
+        // System.out.println("self: \n" + board);
+        // Board twin = board.twin();
+        // System.out.println("twin: " + twin);
+
+        In in = new In(args[0]);
+        int n = in.readInt();
+        int[][] tiles = new int[n][n];
+        for (int i = 0; i < n; i++)
+            for (int j = 0; j < n; j++)
+                tiles[i][j] = in.readInt();
+        Board initial = new Board(tiles);
+        System.out.println("self: " + initial);
+        // Iterable<Board> neigibours = initial.neighbors();
+        // for (Board board : neigibours) {
+        //     System.out.println("neighbor:" + board);
+        System.out.println("twin: " + initial.twin());
+    }
 }
+

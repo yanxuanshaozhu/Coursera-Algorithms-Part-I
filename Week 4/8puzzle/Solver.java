@@ -1,18 +1,17 @@
 /* *****************************************************************************
  *  Name:  yanxuanshaozhu
- *  Date:  05/24/2021
+ *  Date:  05/05/2021
  *  Description: coursera algorithm week 4 project
  **************************************************************************** */
 
 import edu.princeton.cs.algs4.In;
 import edu.princeton.cs.algs4.MinPQ;
+import edu.princeton.cs.algs4.Stack;
 import edu.princeton.cs.algs4.StdOut;
 
-import java.util.ArrayList;
-
 public class Solver {
-    private MinPQ<SearchNode> checkGoal;
-    private MinPQ<SearchNode> twinCheckGoal;
+    private final MinPQ<SearchNode> checkGoal;
+    private final MinPQ<SearchNode> twinCheckGoal;
 
     private class SearchNode implements Comparable<SearchNode> {
         Board board;
@@ -51,15 +50,17 @@ public class Solver {
         while (!checkGoal.min().board.isGoal() && !twinCheckGoal.min().board.isGoal()) {
             SearchNode node = checkGoal.delMin();
             SearchNode twin = twinCheckGoal.delMin();
-            Iterable<Board> neighbors = node.board.neighbors();
-            for (Board neighbor : neighbors) {
-                SearchNode newNode = new SearchNode(neighbor, node.moves + 1, node);
-                checkGoal.insert(newNode);
+            for (Board neighbor : node.board.neighbors()) {
+                if (!neighbor.equals(node.board)) {
+                    SearchNode newNode = new SearchNode(neighbor, node.moves + 1, node);
+                    checkGoal.insert(newNode);
+                }
             }
-            Iterable<Board> twinNeighbors = twin.board.neighbors();
-            for (Board twinNeighbor : twinNeighbors) {
-                SearchNode twiNewNode = new SearchNode(twinNeighbor, twin.moves + 1, twin);
-                twinCheckGoal.insert(twiNewNode);
+            for (Board twinNeighbor : twin.board.neighbors()) {
+                if (!twinNeighbor.equals(twin.board)) {
+                    SearchNode twiNewNode = new SearchNode(twinNeighbor, twin.moves + 1, twin);
+                    twinCheckGoal.insert(twiNewNode);
+                }
             }
         }
     }
@@ -78,17 +79,19 @@ public class Solver {
     }
 
     // sequence of boards in a shortest solution; null if unsolvable
+    // According to the autograder, the first in the solution should be the initial board,
+    // so we use a stack here
     public Iterable<Board> solution() {
         if (!isSolvable()) {
             return null;
         }
-        ArrayList<Board> boards = new ArrayList<>();
+        Stack<Board> boards = new Stack<>();
         SearchNode node = checkGoal.min();
         while (node.prev != null) {
-            boards.add(node.board);
+            boards.push(node.board);
             node = node.prev;
         }
-        boards.add(node.board);
+        boards.push(node.board);
         return boards;
     }
 
@@ -102,7 +105,6 @@ public class Solver {
             for (int j = 0; j < n; j++)
                 tiles[i][j] = in.readInt();
         Board initial = new Board(tiles);
-
         // solve the puzzle
         Solver solver = new Solver(initial);
 
