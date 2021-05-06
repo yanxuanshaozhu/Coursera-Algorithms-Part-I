@@ -79,14 +79,17 @@ public class Board {
     public boolean isGoal() {
         if (manhattan() == 0 && hamming() == 0) {
             return true;
-        } else {
-            return false;
         }
+        return false;
+
     }
 
     // does this board equal y?
     public boolean equals(Object y) {
-        if (!(y instanceof Board)) {
+        if (y == null) {
+            return false;
+        }
+        if (y.getClass() != Board.class) {
             return false;
         } else {
             if (this.size != ((Board) y).size) {
@@ -271,34 +274,44 @@ public class Board {
     }
 
     // a board that is obtained by exchanging any pair of tiles
+
+    //
     public Board twin() {
-        int n = StdRandom.uniform(this.size);
-        int m = 0;
-        if (n == 0) {
-            m = StdRandom.uniform(this.size - 1);
-            m += 1;
-        } else {
-            m = StdRandom.uniform(n);
+        int x0 = StdRandom.uniform(this.size);
+        int y0 = StdRandom.uniform(this.size);
+
+        while (this.board[x0][y0] == 0) {
+            x0 = StdRandom.uniform(this.size);
+            y0 = StdRandom.uniform(this.size);
         }
+
+        int x1 = StdRandom.uniform(this.size);
+        int y1 = StdRandom.uniform(this.size);
+
+        while (this.board[x1][y1] == 0 || x1 == x0 && y1 == y0) {
+            x1 = StdRandom.uniform(this.size);
+            y1 = StdRandom.uniform(this.size);
+        }
+
         int[][] temp = new int[this.board.length][];
         for (int i = 0; i < this.board.length; i++) {
             temp[i] = Arrays.copyOf(this.board[i], this.board[i].length);
         }
-        int val = temp[n][n];
-        temp[n][n] = temp[m][m];
-        temp[m][m] = val;
+        int val = temp[x0][y0];
+        temp[x0][y0] = temp[x1][y1];
+        temp[x1][y1] = val;
         return new Board(temp);
     }
 
-    // unit testing (not graded)
+    //unit testing (not graded)
     // public static void main(String[] args) {
-    //     int[][] nums = { { 1, 4, 2 }, { 3, 0, 5 }, { 6, 7, 8 } };
+    //     int[][] nums = { { 1, 0 }, { 2, 3 } };
     //     Board board = new Board(nums);
     //     System.out.println("size: " + board.size);
     //     System.out.println("print: \n " + board);
     //     System.out.println("Hamming:" + board.hamming());
     //     System.out.println("Manhattan: " + board.manhattan());
-    //     System.out.println("self: " + board);
+    //     System.out.println("self: \n" + board);
     //     Iterable<Board> neighbors = board.neighbors();
     //     for (Board neighbor : neighbors) {
     //         System.out.println("neighbor:\n" + neighbor);
@@ -306,5 +319,17 @@ public class Board {
     //     System.out.println("self: \n" + board);
     //     Board twin = board.twin();
     //     System.out.println("twin: " + twin);
+    //
+    //     In in = new In(args[0]);
+    //     int n = in.readInt();
+    //     int[][] tiles = new int[n][n];
+    //     for (int i = 0; i < n; i++)
+    //         for (int j = 0; j < n; j++)
+    //             tiles[i][j] = in.readInt();
+    //     Board initial = new Board(tiles);
+    //     System.out.println(initial);
+    //     for (Board board : initial.neighbors()) {
+    //         System.out.println(board);
+    //     }
     // }
 }
