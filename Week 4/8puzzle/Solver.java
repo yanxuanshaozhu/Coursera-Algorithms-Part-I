@@ -10,8 +10,8 @@ import edu.princeton.cs.algs4.Stack;
 import edu.princeton.cs.algs4.StdOut;
 
 public class Solver {
-    private final MinPQ<SearchNode> checkGoal;
-    private final MinPQ<SearchNode> twinCheckGoal;
+    private SearchNode lastNode;
+    private boolean isSolvable;
 
     private class SearchNode implements Comparable<SearchNode> {
         Board board;
@@ -41,25 +41,42 @@ public class Solver {
         SearchNode initialTwin = new SearchNode(initial.twin(), 0, null);
 
 
-        checkGoal = new MinPQ<>();
-        twinCheckGoal = new MinPQ<>();
+        MinPQ<SearchNode> checkGoal = new MinPQ<>();
+        MinPQ<SearchNode> twinCheckGoal = new MinPQ<>();
 
         checkGoal.insert(initialNode);
         twinCheckGoal.insert(initialTwin);
 
-        while (!checkGoal.min().board.isGoal() && !twinCheckGoal.min().board.isGoal()) {
-            SearchNode node = checkGoal.delMin();
-            SearchNode twin = twinCheckGoal.delMin();
-            for (Board neighbor : node.board.neighbors()) {
-                if (!neighbor.equals(node.board)) {
-                    SearchNode newNode = new SearchNode(neighbor, node.moves + 1, node);
-                    checkGoal.insert(newNode);
+        while (true) {
+            SearchNode current = checkGoal.delMin();
+            SearchNode currentTwin = twinCheckGoal.delMin();
+
+            if (current.board.isGoal()) {
+                this.lastNode = current;
+                this.isSolvable = true;
+                break;
+            } else if (currentTwin.board.isGoal()) {
+                this.isSolvable = false;
+                break;
+            } else {
+                for (Board neighbor : current.board.neighbors()) {
+                    if (current.prev == null) {
+                        checkGoal.insert(new SearchNode(neighbor, current.moves + 1, current));
+                    } else {
+                        if (!current.prev.board.equals(neighbor)) {
+                            checkGoal.insert(new SearchNode(neighbor, current.moves + 1, current));
+                        }
+                    }
                 }
-            }
-            for (Board twinNeighbor : twin.board.neighbors()) {
-                if (!twinNeighbor.equals(twin.board)) {
-                    SearchNode twiNewNode = new SearchNode(twinNeighbor, twin.moves + 1, twin);
-                    twinCheckGoal.insert(twiNewNode);
+
+                for (Board neighbor : currentTwin.board.neighbors()) {
+                    if (currentTwin.prev == null) {
+                        twinCheckGoal.insert(new SearchNode(neighbor, currentTwin.moves + 1, currentTwin));
+                    } else {
+                        if (!currentTwin.prev.board.equals(neighbor)) {
+                            twinCheckGoal.insert(new SearchNode(neighbor, currentTwin.moves + 1, currentTwin));
+                        }
+                    }
                 }
             }
         }
@@ -67,15 +84,15 @@ public class Solver {
 
     // is the initial board solvable? (see below)
     public boolean isSolvable() {
-        return checkGoal.min().board.isGoal();
+        return this.isSolvable;
     }
 
     // min number of moves to solve initial board; -1 if unsolvable
     public int moves() {
-        if (!isSolvable()) {
+        if (!this.isSolvable) {
             return -1;
         }
-        return checkGoal.min().moves;
+        return this.lastNode.moves;
     }
 
     // sequence of boards in a shortest solution; null if unsolvable
@@ -86,12 +103,11 @@ public class Solver {
             return null;
         }
         Stack<Board> boards = new Stack<>();
-        SearchNode node = checkGoal.min();
-        while (node.prev != null) {
+        SearchNode node = this.lastNode;
+        while (node != null) {
             boards.push(node.board);
             node = node.prev;
         }
-        boards.push(node.board);
         return boards;
     }
 
