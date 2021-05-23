@@ -1661,7 +1661,7 @@
             return max;
           }
         }
-        ```
+       ```
      * Implementation considerations
        * Immutability of keys
          * Immutable data type: cannot change the data type once created
@@ -1742,7 +1742,7 @@
             }
           }
         }
-        ```
+       ```
      * Proposition
        * Heap construction uses $\leq 2N$ comparisons and $\leq N$ exchanges
        * Heap sort uses $\leq 2 N log N + 2 N$ comparisons and $\leq N log N + N$ exchanges
@@ -1773,13 +1773,13 @@
     * Between two particles.
    
          At $t$, we have $(rx_i, ry_i)$, $(vx_i, vy_i)$, $\sigma_i$, $m_i$, $(rx_j, ry_j)$, $(vx_j, vy_j)$, $\sigma_j$, $m_j$. At $t + \Delta t$, we have $(rx_{i}^{'}, ry_{i}^{'})$, $(vx_{i}^{'}, vy_{i}^{'})$, $\sigma_{i}$, $m_i$, $(rx_{j}^{'}, ry_{j}^{'})$, $(vx_{j}^{'}, vy_{j}^{'})$, $\sigma_j$, $m_j$
-      
+   
    
            $$rx_{i}^{'} = rx_{i} + \Delta t vx_{i}, \; ry_{i}^{'} = ry_{i} + \Delta t vy_{i} $$
            $$rx_{j}^{'} = rx_{j} + \Delta t vx_{j}, \; ry_{j}^{'} = ry_{j} + \Delta t vy_{j} $$
            $$vx_{i}^{'} = vx_{i} + \frac{J_{x}}{m_{i}}, \; vy_{i}^{'} = vy_{i} + \frac{J_{y}}{m_{i}} $$
         $$vx_{j}^{'} = vx_{j} + \frac{J_{x}}{m_{j}}, \; vy_{j}^{'} = vy_{j} + \frac{J_{y}}{m_{j}} $$
-   
+       
            where $J = \frac{2m_{i}m_{j}(\Delta v \cdot \Delta r)}{\sigma (m_{i} + m_{j})}$, $J_{x} = \frac{J\Delta rx}{\sigma}$, $J_{y} = \frac{J \Delta ry}{\sigma}$, $\Delta v = (\Delta vx, \Delta vy)$, $\Delta r = (\Delta rx, \Delta ry)$, $\sigma = \sigma_{i} + \sigma_{y}$
      * Java Implementation: I don't put the code here because they are too long, you can find them in the book or on the webpage for the book
        * Particle Class
@@ -2289,3 +2289,481 @@
               }
             } 
             ```
+
+
+
+
+
+# Week 5
+
+1. Balanced Search Trees
+   * 2-3 Search Trees
+     * Allow 1 or 2 keys per node:
+       * 2-node: one key `key0`, two children, key(keys) on the left child should be smaller than `key0`, key(keys) on the right child should be larger than `key0`
+       * 3-node: two keys `key0` and `key1` (`key0 < key1`), three children, key(keys) on the left child should be smaller than `key0`, key(keys) on the middle child should be between `key0`and `key1`, key(keys) on the right child should be larger than `key1`
+     * Perfect balance: every path from root to null link has the same length
+     * Symmetric order: inorder traversal yields keys in ascending order
+     * Search
+       * Compare search key against keys in node
+       * Find interval containing search key
+       * Follow associated link recursively
+     * Insert into a 2-node at bottom
+       * Search for key as usual
+       * Replace 2-node with 3-node
+     * Insert into a 3-node at bottom
+       * Add new key to 3-node to create temporary 4-node
+       * Move middle key in 4-node into parent, the temporary 4-node split into three 2-node
+       * Repeat up the tree, as necessary(if parent is already a 3-node)
+       * If you reach the root and it's a 4-node, split in into three 2-nodes, the middle one becomes the new root, the left and right one become the first two children
+     * Splitting a 4-node is a local transformation, it involves only constant number of operations
+     * Global properties in a 2-3 tree: 2-3 tree maintains symmetric order and perfect balance
+     * Performance: every path from root to null link has the same length
+     * Tree height:
+       * Worst case all 2-nodes: $log_{2} N$
+       * Best case all 3-nodes: $log_{3} N \approx 0.631 log_{2}N$
+       * Between 12 and 20 for a million nodes
+       * Between 18 to 30 for a billion nodes
+       * Guaranteed logarithmic performance for search and insert
+     * Direct implementation could be complicated
+   * Red-Black BSTs
+     * Paper: Guibas-Sedgewick 1979 and Sedgewick 2007
+     * Easy implementation of 2-3 tree:
+       * Represent 2-3 tree as a BST
+       * Use internal left-leaning link as glue for 3-nodes
+        ![](/images/Algorithm/RBT3Node.png)
+       * Black links connect 2-nodes and 3-nodes, red links glue nodes within a 3-node
+       * Definition: a BST such that
+         * No node has two read links connected to it
+         * Perfect black balance: every path from root to null link has the same number of black links
+         * Red links lean left
+     * Key property: 1-1 correspondence between 2-3 and LLRB(Left-Leaning Red-Black Tree)
+       
+       * Make each red links in LLRB horizontal and replace melt the associated 2-nodes into 3-nodes, the result is a 2-3 tree
+     * Search implementation: search is the same as for elementary BST(ignore color)  
+        ```java
+        public Val get(Key key) {
+          Node x = root;
+          while (x != null) {
+            int cmp = key.compareTo(x.key);
+            if (cmp < 0) {
+              x = x.left;
+            } else if(cmp > 0) {
+              x = x.right;
+            } else if (cmp == 0) {
+              return x.val;
+            }
+          }
+          return null;
+        }
+        ```
+     * RBT representation
+       * Since each node is pointed to by precisely one link from its parent, we can encode color of links in nodes
+          ```java
+          private static final boolean RED = true;
+     private static final boolean BLACK = false;
+     
+          private class Node {
+            private Key key;
+            private Value val;
+            private Node left, right;
+            private boolean color;
+       private int size;
+     
+            public Node(Key key, Value val, boolean color, int size) {
+              this.key = key;
+              this.val = val;
+              this.color = color;
+              this.size = size;
+            }
+     }
+     
+          private boolean isRed(Node x) {
+            if (x == null) {
+              return false;
+            }
+            return x.color == RED;
+          }
+          ```
+     * Left rotation: orient a temporarily right-leaning red link to lean left
+       * Idea: oldRoot => newRoot.left, oldRoot.right => newRoot
+          ```java
+          private Node rotateLeft(Node x) {
+            Node temp = x.right;
+            x.right = temp.left;
+            temp.left = x;
+            temp.color = x.color;
+            x.color = RED;
+            temp.size = x.size;
+            x.size = size(x.left) + size(x.right) + 1;
+            return x;
+          }
+          ```
+       * Invariants: maintains symmetric order and perfect black balance
+     * Right rotation: orient a left-leaning read link to temporarily lean right
+       * Idea: oldRoot => newRoot.right, oldRoot.left => newRoot
+          ```java
+          private Node rotateLeft(Node x) {
+            Node temp = x.left;
+            x.left = temp.right;
+            temp.right = x;
+            temp.color = x.color;
+            x.color = RED;
+            temp.size = x.size;
+            x.size = size(x.left) + size(x.right) + 1;
+            return x;
+          }
+          ```
+       * Invariants: maintains symmetric order and perfect black balance
+     * Color flip: recolor to split a temporary 4-node
+       * Idea: middleNode.color: black => red, leftNode.color: red => black, rightNode.color: red => black
+          ```java
+          private void flipColors(Node x) {
+            assert !isRed(x);
+            assert isRed(x.left);
+            assert isRed(x.right);
+            x.color = RED;
+            x.left.color = BLACK;
+            x.right.color = BLACK;
+          }
+          ```
+       * Invariants: maintains symmetric order and perfect black balance 
+     * Insertion in a LLRB tree：
+       * Basic strategy: maintain 1-1 correspondence with 2-3 trees by applying elementary red-black BST operations 
+       * Every time you insert a new node, it creates a red link with its parent
+       * Case 1: insert into a 2-node at the bottom
+         * Prerequisite: insert into a tree with exactly 1 node
+          ![](/images/Algorithm/BST1NodeInsertion.png)
+         * Steps of insertion:
+           * Do standard BST insert, color new link red
+           * If new red link is a right link, do left rotation
+       * Case 2: insert into a 3-node at the bottom
+         * Prerequisite: insert into a tree with exactly 2 nodes
+           ![](/images/Algorithm/BST2NodeInsertion.pngs)
+         * Steps of insertion:
+           * Do standard BST insertion, color new link red
+           * Rotate to balance the 4-node if needed
+           * Flip colors to pass red link up one level
+           * Rotate to make lean left if needed
+           * Repeat case 1 or 2 up the tree if needed
+       * Java implementation
+         * Handle all cases:
+           * Right child red, left child black: left rotation
+           * Left child, left-left grandchild red: right rotation
+           * Both children red: flip colors
+         * Java code
+            ```java
+            private Node put(Node node, Key key, Value val) {
+              if (node == null) {
+                return new Node(key, val, RED);
+              }
+              int cmp = key.compareTo(node.key);
+              if (cmp < 0) {
+                node.left = put(node.left, key, val);
+              } else if (cmp > 0) {
+                node.right = put(node.right, key, val);
+              } else if (cmp == 0) {
+                node.val = val;
+         }
+     
+              if (isRed(node.right) && !isRed(node.left)) {
+                node = rotateLeft(node);
+              }
+              if (isRed(node.left) && isRed(node.left.left)) {
+                node = rotateRight(node);
+              }
+              if (isRed(node.left) && isRed(node.right)) {
+                flipColors(node);
+         }
+     
+              return node;
+            }
+            ```
+     * Preposition: height or LLRB trees is $\leq 2logN$ in the worst case
+     * Performance analysis:  
+        ![](/images/Algorithm/BSTPerformance.png)
+   * B-Trees
+     * Definition: generalize 2-3 trees by allowing up to $M - 1$ key-link pairs per node
+       * At least 2 key-link pairs at root
+       * At least $M / 2$ key-link pairs in other nodes
+       * External nodes contain client keys
+       * Internal nodes contain copies of keys to guide search
+     * Searching in a B-tree
+       * Start at root
+       * Find interval for search key and take corresponding link
+       * Search terminates in external node
+     * Insertion in a B-tree
+       * Search for new key
+       * Insert at bottom
+       * Split nodes with M key-link pairs on the way up the tree
+     * Balance in B-tree
+       * Preposition: a search or an insertion in a B-tree of order $M$ with $N$ keys requires between $log_{2} {M - 1}$ and $log_{M / 2} {N}$ probs
+       * In practice, number of probs is at most 4(M = 1024, N = 62 billion, $log_{M/2} {N} \leq 4$)
+       * Optimization: always keep root page in memory
+     * Balanced trees in the wild
+       * Red-black trees are widely used as system symbol tables
+         * Java: `java.util.TreeMap`, `java.util.TreeSet`
+         * C++ STL: map, multimap, multiset
+         * Linux kernel: completely fair schedule, linux/rbtree.h
+         * Emacs: conservative stack scanning
+       * B-tree variants: B+ tree, B* tree, B# tree
+       * B-trees and variants are widely used for file systems and databases
+         * Windows: NTFS
+         * Mac: HFS, HFS+
+         * Linux: ReiserFS, XFS, Ext3FS, JFS
+      * Databases: ORACLE, DB2, INGRES, SQL, PostgreSQL
+   
+2. Geometric Applications of BSTs
+   * 1d Range Search
+     * Extension of ordered symbol table
+       * Insert key-value pair
+       * Search for key $k$
+       * Delete key $k$
+       * Range search: find all keys between $K_1$ and $k_2$
+       * Range count: number of keys between $k_1$ and $k_2$
+     * Application: database queries
+     * Geometric interpretation
+       * Keys are point on a line
+       * Find/count points in a given 1d interval
+     * Implementation:
+    
+        |data structure    | insert |range count| range search |
+        |      :-----:        | :-----:   |    :-----:   |     :-----:     |
+        |unordered array   | $1$    | $N$       |     $N$      |
+        | ordered array    | $N$    |   $logN$  |   $R + logN$ |
+        |   goal           | $logN$ |   $logN$  | $R + logN$   |
+        
+        N = number of keys, R = number of keys that match
+     * 1d range search: BST implementation
+       * Find all keys between `lo` and `hi`
+         * Recursively find all keys in left subtree if any could fall in range
+         * Check key in current node
+         * Recursively find all keys in right subtree if any could fall in range
+       * Preposition: running time proportional to $R + log N$   
+   * Linear Segment Insertion
+     * Orthogonal line segment insertion search: given $N$ horizontal and vertical line segments, find all intersections. Non-degeneracy assumption: all x- and y- coordinates are distinct
+       * Quadratic algorithm: check all pairs of line segments for intersection
+       * Sweep-line algorithm: sweep vertical line from left to right
+         * x-coordinate define events
+         * horizontal-segment(left endpoint): insert y-coordinate into BST
+         * horizontal-segment(right endpoint): remove y-coordinate from BST
+         * vertical-segment: range search for interval of y-endpoints
+       * Preposition: the sweep-line algorithm takes time proportional to $N log N + R$ to find all $R$ intersections among $N$ orthogonal line segments 
+   * Kd-Trees
+     * 2d orthogonal range search
+       * Extension of ordered symbol-table to 2d keys
+         * Insert a 2d key
+         * Delete a 2d key
+         * Search for a 2d key
+         * Range search: find all keys that lie in a 2d range
+         * Range count: number of keys that lie in a 2d range
+       * Geometric interpretation
+         * Keys are point in the plane
+         * Find/count points in a given h-v rectangle
+       * Applications: networking, circuit design, databases
+       * 2d orthogonal range search: grid implementation
+         * Divide space into M-by-M grid of squares
+         * Create list of points contained in each square
+         * Use 2d array to directly index relevant square
+         * Insert: `add(x,y)` to list for corresponding square
+         * Range search: examine only squares that intersect 2d range query
+       * Grid implementation is a fast and simple solution for evenly-distributed points, but it does not perform well for when clustering appears
+     * Space-partitioning trees
+       * Use a tree to represent a recursive subdivision of 2d space
+       * Grid: divide space uniformly into squares
+       * 2d tree: recursively divide space into two half-planes
+       * Quadtree: recursively divide space into four quadrants
+       * BSP tree: recursively divide space into two regions
+       * Applications: Ray tracing, 2d range search, nearest neighbor search, collision detections, adaptive mesh generation
+     * 2d tree
+       * Data structure: BST, but alternate using x- and y-coordinates as key
+         * Search gives rectangle containing point
+         * Insert further subdivides the plane
+       * Construction
+         * First level vertical node and then horizontal nodes and then vertical nodes,...
+         * On the left of previous node => left subtree, on the right of previous node => right subtree
+       * Range search in a 2d tree: find all points in a query axis-aligned rectangle
+         * Check if point in node lies in given rectangle
+         * Recursively search left/bottom if any could fall in rectangle
+         * Recursively search right/top if any could fall in rectangle
+       * Range search performance in a 2d tree
+         * Typical case: $R + log N$
+         * Worst case: $R + \sqrt{N}$
+       * Nearest neighbor search in a 2d tree: find closest point to the query point
+         * Algorithm
+           * Check distance from point in node to the query point
+           * Recursively search left/bottom if it could contain a closer point
+           * Recursively search right/top if it could contain a closer point
+           * Organize method so that it starts from root
+     * Flocking boids [Craig Reynolds, 1986]
+       * Boids, three simple rules lead to complex emergent flocking behavior
+         * Collision avoidance: point away from k nearest boids
+         * Flock centering: point towards the center of mass of k nearest boids
+         * Velocity matching: update velocity to the average of k nearest boids
+       * Kd tree: recursively partition k-dimensional space into 2 half-spaces
+         * Implementation: BST, but cycle through dimensions ala 2d trees
+   * Interval Search Trees
+     * 1d interval search: data structure to hold set of overlapping intervals
+       * Insert an interval `(lo, hi)`
+       * Search for an interval `(lo, hi)`
+       * Delete an interval `(lo, hi)`
+       * Interval intersection query: given an interval `(lo, hi)`, find all intervals in data structure that intersects `(lo, hi)`
+     * 1d interval search API
+        ```java
+        public class IntervalST<Key extends Comparable<Key>, Value> {
+          IntervalST();                                 // create interval search tree
+          void put(Key lo, Key hi, Value val);          // put interval-value pair into ST 
+          Value get(Key lo, Key hi);                    // value paired with given interval
+          void delete(Key lo, Key hi);                  // delete the given interval
+          Iterable<Value> intersects(Key lo, Key hi);   // all intervals that intersect the given interval
+        }
+        ```
+       * Construction
+         * BST each nodes contains an interval `(lo, hi)`, use left endpoint as BST key
+         * Store max endpoint in subtree rooted at node
+       * Insert an interval `(lo, hi)`
+         * Insert into BST, using `lo` as the key
+         * Update max in each node on search path
+       * Find interval that intersects query interval `(lo, hi)`
+         * If interval in node intersects query interval, return it
+         * Else if left subtree is null, go right
+         * Else is max endpoint in left subtree is less than `lo`, go right
+         * Else go left
+     * Interval search tree performance analysis
+
+     |     operation      |  brute   | interval search tree | best in memory  |
+     |     :-----:        |  :-----: |      :-----:         |    :-----:      |
+     | insert interval    |    $1$   |        $log N$       |     $log N$     |
+     | find interval      |    $N$   |        $log N$       |     $log N$     |
+     | delete interval    |    $N$   |        $log N$       |     $log N$     |
+     | find any one interval </br>that intersects `(lo, hi)` |  $N$   |        $log N$       |     $log N$     |
+     | find all intervals </br>that intersects `(lo, hi)` |  $N$   |        $R log N$       |     $R + log N$    |
+
+   * Rectangle Intersection
+     * Orthogonal rectangle intersection search: find all intersections among a set of $N$ orthogonal rectangles, assume all x- and y-coordinates are distinct
+     * Use sweep-line algorithm to reduce the problem to 1d interval search
+     * Proposition: sweep-line algorithm takes time proportional to $N log N + R log N$ to find $R$ intersections among a set of $N$ rectangles
+
+
+
+
+
+
+# Week 6
+
+1. Hash Tables
+   * Hash Tables
+     * Hashing: save items in a key-indexed table
+       * Hash function: method for computing array index from key
+       * Issues:
+         * Computing the hash function
+         * Equality test: method for checking whether two keys are equal
+         * Collision resolution: algorithm and data structure to handle two keys that hash to the same array index
+       * Computing the hash function
+         * Idealistic goal: scramble the keys uniformly to produce a table index
+           * Efficiently computable
+           * Each table index equally likely for each key
+         * Java `hashCode()` function:
+           * Requirement: if `x.equals(y)`, then `x.hashCode() == y.hashCode()`
+           * Highly desirable: if `!x.equals(y)`, then `x.hashCode() != y.hashCode()`
+           * Default implementation: memory address of x
+           * Customized implementations: Integer, Double, String, File, URL, Date, ...
+           * String: $hash = s[0] * 31^{L - 1} + ... + s[L - 1] * 31 ^{0}$
+           * User-defined types: users are on their own, a sample hash: $hash = initialHash + \sum\limits_i {field_i.hashCode()}$
+         * Modular hashing
+           * Hash Code: an int between $- 2^{31}$ and $2^{31} - 1$
+           * Hash function: an int between $0$ and $M - 1$
+              ```java
+              // Wrong, may be negative
+              private int hash(Key key) {
+                return key.hashCode() % M;
+              }
+              // Wrong, Math.abs() cannot convert - 2 ^31 to 2^31, because Integer.MAX_VALUE is 2 ^31 - 1
+              private int hash(Key key) {
+                return Math.abs(key.hashCode()) % M;
+              }
+
+              // Right choice, use 0x7fffffff to remove sign
+              private int hash(Key key) {
+                return (key.hashCode() & 0x7fffffff) % M;
+              }
+              ```
+         * Uniform hashing function: each key is equally likely to hash to an integer between $0$ and $M - 1$
+           * Bins and balls: throw balls uniformly at random into M bins
+             * Birthday problem: expect two balls in the same bin after $\sim \; \sqrt{\pi M / 2}$ tosses
+             * Coupon collector: expect every bin has $\geq 1$ ball after $\sim \; M ln M$ tosses
+             * Load balancing: After M tosses, expect most loaded bin has $\Theta(logM / log log M)$ balls
+   * Separate Chaining
+     * Collisions: two distinct keys hashing to same index
+       * Birthday problem: cannot avoid collisions unless you have a ridiculous amount of memory
+       * Coupon collector + load balancing: collisions will be evenly distributed
+     * Separate chaining symbol table: use an array of $M < N$ linked lists [H. P. Luhn, IBM 1953]
+       * Hash: map key to integer i between $0$ and $M - 1$
+       * Insert: put at front of $i^{th}$ chain if not already here
+       * Search: need to search only $i^{th}$ chain
+     * Proposition: under uniform hashing assumption, prob that the number of keys in a list is within a constant factor of $N/M$ is extremely close to 1
+     * ST implementation: summary
+        ![](/images/Algorithm/SeparateChaining.png)
+
+   * Linear Probing 
+     * Collision resolution: open addressing [Amdahl-Boehme-Rocherster-Samuel, IBM 1953]
+       * When a new key collides, find next empty slot, and put it there. Put at table index `i` if free, if not try `i + 1`, `i + 2`, etc.
+       * The size M must be greater than number of key-value pairs N, in practice, $M \geq N * 2$
+     * Clustering
+       * A cluster is a contiguous block of items
+       * New keys likely to hash into middle of big clusters
+     * Proposition: under uniform hashing assumption, the average # of probes in a linear probing hash table of size $M$ that contains $N = \alpha M$ keys is: $\sim \frac{1}{2}(1 + \frac{1}{1-\alpha})$ for search hit, and $\sim \frac{1}{2}(1 + \frac{1}{(1- \alpha)^{2}})$ for search miss or insert. And the typical choice is that $\alpha = M / N \approx \frac{1}{2}$
+     * ST implementation: summary
+        ![](/images/Algorithm/LinearProbing.png)
+   * Hash Table Context
+     * Java 1.1 use skip hashCode in String type, it's unsafe to do so
+     * Algorithm complexity attacks
+       * Uniform hashing assumption is important: aircraft control, nuclear reactor, pacemaker
+       * Denial-of-service attacks
+       * Diversion: one-way hash functions
+         * Hard to find a key that will hash to a desired value
+         * Applications: digital fingerprint, message digest, storing passwords
+       * Hashing variations:
+         * Two-probe hashing
+         * Double hashing
+         * Cuckoo hashing
+       * BST v.s. Hash tables
+         * Hash tables
+           * Simpler to code
+           * No effective alternative for unordered keys
+           * Faster for simple keys
+           * Better system support in Java for strings
+         * BST
+           * Stronger performance guarantee
+           * Support for ordered ST operations
+           * Easier to implement `compareTo()` correctly than `equals()` and `hashCode()`
+
+2. Symbol Table Applications
+   * Sets: a collection of distinct keys
+     * API
+        ```java
+        public class SET<Key extends Comparable<Key>> {
+          
+          // create empty set
+          SET();
+          // add the key to the set
+          void add(Key key);
+          //is the key in the set?
+          boolean contains(Key key);
+          // remove the key from the set
+          void remove(Key key);
+          // return the number of keys in the set
+          int size();
+          // iterator through keys in the set
+          Iterator<Key> iterator();
+        }
+        ```
+   * Dictionary Clients
+     
+     * Build a client to map key to its associated value
+   * Indexing Clients
+     
+     * Given a list of files specified, create an index so that you can efficiently find all files containing a given query string
+   * Sparse Vectors
+     * For matrix vector multiplication, you can use $O(N^{2})$ for loop.
+     * Sparse vector: use symbol table representation(key = index, value = entry) rather than an array can be efficient(array representation space is proportional to N, ST representation is proportional to # of non-zeroes)
+     * Sparse matrix: each row is a sparse vector rather than an array, space is then proportional to number of non-zeroes plus N rather than $N^{2}$
